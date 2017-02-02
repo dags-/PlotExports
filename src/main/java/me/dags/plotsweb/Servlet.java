@@ -103,9 +103,8 @@ class Servlet {
                 exchange.getResponseHeaders().put(Headers.CONTENT_LENGTH, size);
 
                 try (FileChannel in = FileChannel.open(path.get())) {
-                    exchange.getResponseSender().transferFrom(in, IGNORE_ERR);
+                    exchange.getResponseChannel().transferFrom(in, 0, Long.MAX_VALUE);
                 }
-
             } else {
                 String html = expired.with("link", shortlink).apply();
                 exchange.getResponseSender().send(html);
