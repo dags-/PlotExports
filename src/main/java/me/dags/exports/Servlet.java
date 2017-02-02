@@ -14,9 +14,7 @@ import java.nio.channels.WritableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.PosixFilePermission;
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * @author dags <dags@dags.me>
@@ -51,8 +49,6 @@ class Servlet {
         String shortlink = request.params(":shortlink");
         Optional<Path> path = linkManager.getPath(shortlink);
         if (path.isPresent()) {
-            makeReadable(path.get());
-
             BasicFileAttributes stat = Files.readAttributes(path.get(), BasicFileAttributes.class);
             String name = path.get().getFileName().toString();
             String date = stat.creationTime().toString();
@@ -73,8 +69,6 @@ class Servlet {
         String shortlink = request.params(":shortlink");
         Optional<Path> path = linkManager.getPath(shortlink);
         if (path.isPresent()) {
-            makeReadable(path.get());
-
             BasicFileAttributes stat = Files.readAttributes(path.get(), BasicFileAttributes.class);
             String name = path.get().getFileName().toString();
             String size = "" + stat.size();
@@ -107,12 +101,5 @@ class Servlet {
                 return path;
             }
         }
-    }
-
-    private static void makeReadable(Path path) throws IOException {
-        Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(path);
-        permissions.add(PosixFilePermission.OWNER_READ);
-        permissions.add(PosixFilePermission.GROUP_READ);
-        permissions.add(PosixFilePermission.OTHERS_READ);
     }
 }

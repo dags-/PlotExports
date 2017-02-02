@@ -31,7 +31,7 @@ shadowJar {
     }
     relocate 'spark', 'me.dags.plots.libs.spark'
     relocate 'me.dags.data', 'me.dags.exports.libs.data'
-    archiveName = "${baseName}-${version}.jar"
+    archiveName = "${baseName}-${version}-SpongeAPI-${spongeAPI}.jar"
 }
 
 jar.dependsOn shadowJar
