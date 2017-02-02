@@ -16,7 +16,7 @@ import java.nio.file.Path;
 /**
  * @author dags <dags@dags.me>
  */
-@Plugin(id = "plotexports", name = "PlotExports", version = "1.0", dependencies = @Dependency(id = "plots"))
+@Plugin(id = "plotexports", name = "PlotExports", version = "1.0", dependencies = @Dependency(id = "plots"), description = "shh")
 public class PlotExports {
 
     private final PlotExportsService core;

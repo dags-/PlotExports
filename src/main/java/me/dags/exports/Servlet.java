@@ -1,16 +1,19 @@
 package me.dags.exports;
 
+import io.undertow.Handlers;
+import io.undertow.Undertow;
+import io.undertow.io.IoCallback;
+import io.undertow.io.Sender;
+import io.undertow.server.HttpHandler;
+import io.undertow.server.HttpServerExchange;
+import io.undertow.util.Headers;
 import me.dags.exports.template.Template;
-import spark.Request;
-import spark.Response;
-import spark.Spark;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.WritableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -21,6 +24,7 @@ import java.util.Optional;
  */
 class Servlet {
 
+    private final Undertow server;
     private final Config config;
     private final LinkManager linkManager;
     private final Template download;
@@ -33,58 +37,73 @@ class Servlet {
         this.linkManager = linkManager;
         this.download = Template.parse(download);
         this.expired = Template.parse(expired);
+        this.server = Undertow.builder()
+                .addHttpListener(config.getPort(), "localhost")
+                .setHandler(Handlers.pathTemplate(true)
+                        .add("/exports/{shortlink}", servePage())
+                        .add("/exports/file/{shortlink}", serveFile())
+                ).build();
+
     }
 
     void start() {
-        Spark.port(config.getPort());
-        Spark.get("/exports/:shortlink", this::serveDownloadPage);
-        Spark.get("/exports/file/:shortlink", this::serveFile);
+        server.start();
     }
 
     void stop() {
-        Spark.halt();
+        server.stop();
     }
 
-    private Object serveDownloadPage(Request request, Response response) throws Exception {
-        String shortlink = request.params(":shortlink");
-        Optional<Path> path = linkManager.getPath(shortlink);
-        if (path.isPresent()) {
-            BasicFileAttributes stat = Files.readAttributes(path.get(), BasicFileAttributes.class);
-            String name = path.get().getFileName().toString();
-            String date = stat.creationTime().toString();
-            String size = String.format("%.2fKb", stat.size() / 1024F);
-            String href = "/exports/file/" + shortlink;
+    private HttpHandler servePage() {
+        return exchange -> {
+            exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/html");
 
-            return download.with("file.name", name)
-                    .with("file.date", date)
-                    .with("file.size", size)
-                    .with("file.href", href)
-                    .apply();
-        }
+            String shortlink = exchange.getPathParameters().get("shortlink").getFirst();
+            Optional<Path> path = linkManager.getPath(shortlink);
+            if (path.isPresent()) {
+                BasicFileAttributes stat = Files.readAttributes(path.get(), BasicFileAttributes.class);
+                String name = path.get().getFileName().toString();
+                String date = stat.creationTime().toString();
+                String size = String.format("%.2fKb", stat.size() / 1024F);
+                String href = "/exports/file/" + shortlink;
 
-        return expired.with("link", shortlink).apply();
-    }
+                String html = download.with("file.name", name)
+                        .with("file.date", date)
+                        .with("file.size", size)
+                        .with("file.href", href)
+                        .apply();
 
-    private Object serveFile(Request request, Response response) throws Exception {
-        String shortlink = request.params(":shortlink");
-        Optional<Path> path = linkManager.getPath(shortlink);
-        if (path.isPresent()) {
-            BasicFileAttributes stat = Files.readAttributes(path.get(), BasicFileAttributes.class);
-            String name = path.get().getFileName().toString();
-            String size = "" + stat.size();
-
-            response.header("Content-Type", "application/octet-stream");
-            response.header("Content-Disposition", String.format("attachment; filename=\"%s\"", name));
-            response.header("Content-Length", size);
-
-            try (FileChannel in = FileChannel.open(path.get())) {
-                try (WritableByteChannel out = Channels.newChannel(response.raw().getOutputStream())) {
-                    in.transferTo(0, Long.MAX_VALUE, out);
-                }
+                exchange.getResponseSender().send(html);
+            } else {
+                String html = expired.with("link", shortlink).apply();
+                exchange.getResponseSender().send(html);
             }
-        }
+        };
+    }
 
-        return expired.with("link", shortlink).apply();
+    private HttpHandler serveFile() {
+        return exchange -> {
+            String shortlink = exchange.getPathParameters().get("shortlink").getFirst();
+            Optional<Path> path = linkManager.getPath(shortlink);
+
+            if (path.isPresent()) {
+                BasicFileAttributes stat = Files.readAttributes(path.get(), BasicFileAttributes.class);
+                String name = path.get().getFileName().toString();
+                String size = "" + stat.size();
+                String disposition = String.format("attachment; filename=\"%s\"", name);
+
+                exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "application/octet-stream");
+                exchange.getResponseHeaders().put(Headers.CONTENT_DISPOSITION, disposition);
+                exchange.getResponseHeaders().put(Headers.CONTENT_LENGTH, size);
+
+                try (FileChannel in = FileChannel.open(path.get())) {
+                    exchange.getResponseSender().transferFrom(in, IGNORE_ERR);
+                }
+            } else {
+                String html = expired.with("link", shortlink).apply();
+                exchange.getResponseSender().send(html);
+            }
+        };
     }
 
     private static Path getOrExtract(Path dir, String resource) throws IOException {
@@ -102,4 +121,14 @@ class Servlet {
             }
         }
     }
+
+    private static final IoCallback IGNORE_ERR = new IoCallback() {
+        @Override
+        public void onComplete(HttpServerExchange exchange, Sender sender) {
+        }
+
+        @Override
+        public void onException(HttpServerExchange exchange, Sender sender, IOException exception) {
+        }
+    };
 }
