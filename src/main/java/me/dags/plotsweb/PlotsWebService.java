@@ -1,6 +1,6 @@
-package me.dags.exports;
+package me.dags.plotsweb;
 
-import me.dags.exports.service.ExportService;
+import me.dags.plotsweb.service.ExportService;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -12,13 +12,13 @@ import java.util.Optional;
 /**
  * @author dags <dags@dags.me>
  */
-class PlotExportsService implements ExportService {
+class PlotsWebService implements ExportService {
 
     private final Config config;
     private final Servlet servlet;
     private final LinkManager linkManager;
 
-    PlotExportsService(Path configDir) throws IOException {
+    PlotsWebService(Path configDir) throws IOException {
         Path path = configDir.resolve("config.conf");
         this.config = new Config(path);
         this.linkManager = new LinkManager(config);
@@ -45,5 +45,10 @@ class PlotExportsService implements ExportService {
             }
         }
         return Optional.empty();
+    }
+
+    @Override
+    public boolean running() {
+        return servlet.isRunning();
     }
 }

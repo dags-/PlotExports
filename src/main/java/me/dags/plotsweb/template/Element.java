@@ -1,4 +1,4 @@
-package me.dags.exports.template;
+package me.dags.plotsweb.template;
 
 /**
  * @author dags <dags@dags.me>

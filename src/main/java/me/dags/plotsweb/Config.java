@@ -1,4 +1,4 @@
-package me.dags.exports;
+package me.dags.plotsweb;
 
 import me.dags.data.NodeAdapter;
 import me.dags.data.node.Node;
@@ -12,7 +12,7 @@ import java.nio.file.Path;
 class Config {
 
     private final Path path;
-    private int port = 8130;
+    private int port = 8127;
     private String base_url = "http://localhost";
     private long expiry_time_secs = 60L * 5L;
 

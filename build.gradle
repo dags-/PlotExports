@@ -20,9 +20,7 @@ repositories {
 dependencies {
     apply plugin: 'java'
     compile "org.spongepowered:spongeapi:${spongeAPI}-$spongeChannel"
-    compile 'io.undertow:undertow-core:1.4.8.Final'
     compile 'io.undertow:undertow-servlet:1.4.8.Final'
-    compile 'io.undertow:undertow-websockets-jsr:1.4.8.Final'
     compile 'com.github.dags-:NodeData:1.3.0-SNAPSHOT-20'
 }
 
@@ -31,10 +29,20 @@ shadowJar {
         include dependency('com.github.dags-:NodeData')
         include dependency('io.undertow:undertow-core')
         include dependency('io.undertow:undertow-servlet')
-        include dependency('io.undertow:undertow-websockets-jsr')
+        include dependency('org.jboss.xnio:xnio-api')
+        include dependency('org.jboss.xnio:xnio-nio')
+        include dependency('org.jboss.logging:jboss-logging')
+        include dependency('org.jboss.javax.websocket:jboss-websocket-api_1.1_spec')
+        include dependency('org.jboss.spec.javax.servlet:jboss-servlet-api_3.1_spec')
+        include dependency('org.jboss.spec.javax.annotation:jboss-annotations-api_1.2_spec')
     }
-    relocate 'io.undertow', 'me.dags.exports.libs.undertow'
-    relocate 'me.dags.data', 'me.dags.exports.libs.data'
+
+    relocate 'org.jboss', 'me.dags.plotsweb.libs.jboss'
+    relocate 'javax.servlet', 'me.dags.plotsweb.libs.servlet'
+    relocate 'javax.annotation', 'me.dags.plotsweb.libs.annotation'
+    relocate 'io.undertow', 'me.dags.plotsweb.libs.undertow'
+    relocate 'me.dags.data', 'me.dags.plotsweb.libs.data'
+
     archiveName = "${baseName}-${version}-SpongeAPI-${spongeAPI}.jar"
 }
 

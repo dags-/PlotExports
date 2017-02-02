@@ -1,4 +1,4 @@
-package me.dags.exports.template;
+package me.dags.plotsweb.template;
 
 import java.io.BufferedReader;
 import java.io.IOException;

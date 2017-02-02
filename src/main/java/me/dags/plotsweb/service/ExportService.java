@@ -1,4 +1,4 @@
-package me.dags.exports.service;
+package me.dags.plotsweb.service;
 
 import java.net.URL;
 import java.nio.file.Path;
@@ -10,4 +10,6 @@ import java.util.Optional;
 public interface ExportService {
 
     Optional<URL> getExportURL(Path path);
+
+    boolean running();
 }

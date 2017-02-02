@@ -1,4 +1,4 @@
-package me.dags.exports.template;
+package me.dags.plotsweb.template;
 
 import java.util.ArrayList;
 import java.util.List;
