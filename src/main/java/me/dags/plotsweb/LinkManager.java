@@ -24,11 +24,11 @@ final class LinkManager {
 
     LinkManager(Config config) {
         this.codeToObject = CacheBuilder.newBuilder()
-                .expireAfterAccess(config.getExpiryTimeSecs(), TimeUnit.SECONDS)
+                .expireAfterWrite(config.getExpiryTimeSecs(), TimeUnit.SECONDS)
                 .removalListener(removeListener())
                 .build();
         this.objectToCode = CacheBuilder.newBuilder()
-                .expireAfterAccess(config.getExpiryTimeSecs(), TimeUnit.SECONDS)
+                .expireAfterWrite(config.getExpiryTimeSecs(), TimeUnit.SECONDS)
                 .build();
     }
 
