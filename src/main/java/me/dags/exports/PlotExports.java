@@ -9,6 +9,7 @@ import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.scheduler.Task;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -37,7 +38,7 @@ public class PlotExports {
     @Listener
     public void init(GameInitializationEvent e) {
         if (core != null) {
-            core.start();
+            Task.builder().async().execute(core::start).submit(this);
             Sponge.getServiceManager().setProvider(this, ExportService.class, core);
         }
     }
