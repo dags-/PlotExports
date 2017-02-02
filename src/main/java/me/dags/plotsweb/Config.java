@@ -13,7 +13,7 @@ class Config {
 
     private final Path path;
     private int port = 8127;
-    private String base_url = "http://localhost";
+    private String base_url = "http://localhost:8127";
     private long expiry_time_secs = 60L * 5L;
 
     Config(Path path) {
