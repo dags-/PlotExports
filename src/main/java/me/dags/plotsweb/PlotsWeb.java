@@ -30,8 +30,8 @@ public class PlotsWeb {
     @Listener
     public void init(GameInitializationEvent e) {
         try {
-            loadAsset("expired.html");
             loadAsset("download.html");
+            loadAsset("notfound.html");
             PlotsWebService service = new PlotsWebService(configDir);
             Task.builder().async().execute(service::start).submit(this);
             Sponge.getServiceManager().setProvider(this, ExportService.class, service);

@@ -31,7 +31,7 @@ class TemplateParser {
         if (pos + num < in.length()) {
             return in.charAt(pos + num);
         }
-        throw new UnsupportedOperationException("End of text");
+        throw new UnsupportedOperationException("End handle text");
     }
 
     private void skip(int num) {
@@ -42,7 +42,7 @@ class TemplateParser {
         if (hasNext()) {
             return in.charAt(++pos);
         }
-        throw new UnsupportedOperationException("End of text");
+        throw new UnsupportedOperationException("End handle text");
     }
 
     private Element nextElement() {

@@ -46,7 +46,7 @@ final class LinkManager {
     }
 
     Optional<Path> getPath(String shortLink) {
-        return Optional.ofNullable(codeToObject.getIfPresent(shortLink));
+        return shortLink != null ? Optional.ofNullable(codeToObject.getIfPresent(shortLink)) : Optional.empty();
     }
 
     private static String getCode() {
