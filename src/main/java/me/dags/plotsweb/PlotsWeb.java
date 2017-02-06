@@ -1,7 +1,7 @@
 package me.dags.plotsweb;
 
 import com.google.inject.Inject;
-import me.dags.plotsweb.service.ExportService;
+import me.dags.plotsweb.service.PlotsWebService;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.event.Listener;
@@ -32,9 +32,9 @@ public class PlotsWeb {
         try {
             loadAsset("download.html");
             loadAsset("notfound.html");
-            PlotsWebService service = new PlotsWebService(configDir);
+            WebService service = new WebService(configDir);
             Task.builder().async().execute(service::start).submit(this);
-            Sponge.getServiceManager().setProvider(this, ExportService.class, service);
+            Sponge.getServiceManager().setProvider(this, PlotsWebService.class, service);
         } catch (IOException e1) {
             e1.printStackTrace();
         }
@@ -42,10 +42,10 @@ public class PlotsWeb {
 
     @Listener
     public void stopping(GameStoppingServerEvent e) {
-        Sponge.getServiceManager().provide(ExportService.class)
-                .filter(PlotsWebService.class::isInstance)
-                .map(PlotsWebService.class::cast)
-                .ifPresent(PlotsWebService::stop);
+        Sponge.getServiceManager().provide(PlotsWebService.class)
+                .filter(WebService.class::isInstance)
+                .map(WebService.class::cast)
+                .ifPresent(WebService::stop);
     }
 
     private void loadAsset(String name) {

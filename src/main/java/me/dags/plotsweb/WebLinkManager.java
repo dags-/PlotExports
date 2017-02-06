@@ -3,10 +3,9 @@ package me.dags.plotsweb;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
+import me.dags.plotsweb.service.DataStore;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.Optional;
@@ -15,14 +14,14 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author dags <dags@dags.me>
  */
-final class LinkManager {
+final class WebLinkManager {
 
     private static final SecureRandom RANDOM = new SecureRandom();
 
-    private final Cache<String, Path> codeToObject;
-    private final Cache<Path, String> objectToCode;
+    private final Cache<String, DataStore> codeToObject;
+    private final Cache<DataStore, String> objectToCode;
 
-    LinkManager(Config config) {
+    WebLinkManager(Config config) {
         this.codeToObject = CacheBuilder.newBuilder()
                 .expireAfterWrite(config.getExpiryTimeSecs(), TimeUnit.SECONDS)
                 .removalListener(removeListener())
@@ -32,20 +31,20 @@ final class LinkManager {
                 .build();
     }
 
-    String getShortlink(Path path) {
-        String code = objectToCode.getIfPresent(path);
+    String registerDataStore(DataStore store) {
+        String code = objectToCode.getIfPresent(store);
         if (code == null) {
             code = getCode();
             if (codeToObject.getIfPresent(code) != null) {
-                return getShortlink(path);
+                return registerDataStore(store);
             }
-            objectToCode.put(path, code);
-            codeToObject.put(code, path);
+            objectToCode.put(store, code);
+            codeToObject.put(code, store);
         }
         return code;
     }
 
-    Optional<Path> getPath(String shortLink) {
+    Optional<DataStore> getStore(String shortLink) {
         return shortLink != null ? Optional.ofNullable(codeToObject.getIfPresent(shortLink)) : Optional.empty();
     }
 
@@ -62,18 +61,15 @@ final class LinkManager {
         return buffer;
     }
 
-    private RemovalListener<String, Path> removeListener() {
+    private RemovalListener<String, DataStore> removeListener() {
         return notification -> {
-            Path path = notification.getValue();
-            if (path != null) {
-                codeToObject.invalidate(path);
-
-                if (Files.exists(path)) {
-                    try {
-                        Files.delete(path);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+            DataStore store = notification.getValue();
+            if (store != null) {
+                codeToObject.invalidate(store);
+                try {
+                    store.delete();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
         };

@@ -23,7 +23,7 @@ dependencies {
     compile 'org.webbitserver:webbit:0.4.15'
     compile 'org.webbitserver:webbit-rest:0.3.0'
     compile 'com.github.dags-:NodeData:1.3.0-SNAPSHOT-20'
-    compile ('com.github.dags-:PlotsWebAPI:master-SNAPSHOT') {
+    compile ('com.github.dags-:PlotsWebAPI:8863dac') {
         exclude module: 'spongeapi'
     }
 }

@@ -1,4 +1,4 @@
-package me.dags.plotsweb.template;
+package me.dags.plotsweb;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,7 +11,7 @@ import java.util.*;
 /**
  * @author dags <dags@dags.me>
  */
-public class Template {
+class Template {
 
     private final List<Element> elements = new ArrayList<>();
 
@@ -19,7 +19,7 @@ public class Template {
         this.elements.addAll(elements);
     }
 
-    public Instance with(String key, Object arg) {
+    Instance with(String key, Object arg) {
         return new Instance(this).with(key, arg);
     }
 
@@ -39,7 +39,7 @@ public class Template {
         return builder.toString();
     }
 
-    public static Template parse(Path path) {
+    static Template parse(Path path) {
         try (InputStream inputStream = Files.newInputStream(path)) {
             return parse(inputStream);
         } catch (IOException e) {
@@ -67,7 +67,18 @@ public class Template {
         return new Template(elements);
     }
 
-    public static class Instance {
+    static class Element {
+
+        private final String value;
+        private final boolean isArg;
+
+        Element(String value, boolean isArg) {
+            this.value = value;
+            this.isArg = isArg;
+        }
+    }
+
+    static class Instance {
 
         private final Map<String, Object> args = new HashMap<>();
         private final Template template;
@@ -76,12 +87,12 @@ public class Template {
             this.template = template;
         }
 
-        public Instance with(String key, Object arg) {
+        Instance with(String key, Object arg) {
             args.put(key, arg);
             return this;
         }
 
-        public String apply() {
+        String apply() {
             return template.apply(args);
         }
     }

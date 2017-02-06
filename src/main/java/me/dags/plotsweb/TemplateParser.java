@@ -1,4 +1,4 @@
-package me.dags.plotsweb.template;
+package me.dags.plotsweb;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,8 +15,8 @@ class TemplateParser {
         this.in = input;
     }
 
-    List<Element> parse() {
-        List<Element> elements = new ArrayList<>();
+    List<Template.Element> parse() {
+        List<Template.Element> elements = new ArrayList<>();
         while (hasNext()) {
             elements.add(nextElement());
         }
@@ -45,7 +45,7 @@ class TemplateParser {
         throw new UnsupportedOperationException("End handle text");
     }
 
-    private Element nextElement() {
+    private Template.Element nextElement() {
         if (peek(1) == '$' && peek(2) == '{') {
             skip(2);
             return parseArg();
@@ -53,7 +53,7 @@ class TemplateParser {
         return parseText();
     }
 
-    private Element parseText() {
+    private Template.Element parseText() {
         StringBuilder builder = new StringBuilder();
         while (hasNext()) {
             if (peek(1) == '$' && peek(2) == '{') {
@@ -61,10 +61,10 @@ class TemplateParser {
             }
             builder.append(next());
         }
-        return new Element(builder.toString(), false);
+        return new Template.Element(builder.toString(), false);
     }
 
-    private Element parseArg() {
+    private Template.Element parseArg() {
         StringBuilder builder = new StringBuilder();
         while (hasNext()) {
             char c = next();
@@ -73,6 +73,6 @@ class TemplateParser {
             }
             builder.append(c);
         }
-        return new Element(builder.toString(), true);
+        return new Template.Element(builder.toString(), true);
     }
 }
