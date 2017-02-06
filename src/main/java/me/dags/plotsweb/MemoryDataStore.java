@@ -49,6 +49,16 @@ class MemoryDataStore implements DataStore {
     @Override
     public void delete() throws IOException {}
 
+    @Override
+    public boolean equals(Object o) {
+        return o != null && DataStore.class.isInstance(o) && o.hashCode() == this.hashCode();
+    }
+
+    @Override
+    public int hashCode() {
+        return name.hashCode();
+    }
+
     private class Details implements DataStore.Details {
         @Override
         public String getName() {

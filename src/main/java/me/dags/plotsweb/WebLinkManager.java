@@ -31,6 +31,11 @@ final class WebLinkManager {
                 .build();
     }
 
+    String lookupLink(DataStore store) {
+        String link = objectToCode.getIfPresent(store);
+        return link == null ? "error" : link;
+    }
+
     String registerDataStore(DataStore store) {
         String code = objectToCode.getIfPresent(store);
         if (code == null) {

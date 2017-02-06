@@ -34,14 +34,15 @@ class WebService implements PlotsWebService {
     }
 
     @Override
-    public Optional<URL> getDataStoreURL(DataStore dataStore) {
+    public Optional<URL> lookupURL(Object lookup) {
+        String link = linkManager.lookupLink(new LookupDataStore(lookup));
+        return getURL(link);
+    }
+
+    @Override
+    public Optional<URL> registerDataStore(DataStore dataStore) {
         String link = linkManager.registerDataStore(dataStore);
-        String address = String.format("%s/exports/%s", config.getBaseUrl(), link);
-        try {
-            return Optional.of(new URL(address));
-        } catch (MalformedURLException e) {
-            return Optional.empty();
-        }
+        return getURL(link);
     }
 
     @Override
@@ -57,5 +58,14 @@ class WebService implements PlotsWebService {
     @Override
     public boolean running() {
         return servlet.isRunning();
+    }
+
+    private Optional<URL> getURL(String link) {
+        try {
+            String address = String.format("%s/exports/%s", config.getBaseUrl(), link);
+            return Optional.of(new URL(address));
+        } catch (MalformedURLException e) {
+            return Optional.empty();
+        }
     }
 }
